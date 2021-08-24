@@ -1,0 +1,196 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: ProductServiceImpl</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.somecompany.warehouse.service</a> ]
+</div>
+
+<h1>Coverage Summary for Class: ProductServiceImpl (com.somecompany.warehouse.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProductServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    33.3%
+  </span>
+  <span class="absValue">
+    (3/ 9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    22%
+  </span>
+  <span class="absValue">
+    (9/ 41)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.somecompany.warehouse.service;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+<i>4</i>&nbsp;import com.somecompany.warehouse.exception.FileUploadException;
+<i>5</i>&nbsp;import com.somecompany.warehouse.exception.ProductNotFoundException;
+<i>6</i>&nbsp;import com.somecompany.warehouse.exception.ProductOutOfStockException;
+<i>7</i>&nbsp;import com.somecompany.warehouse.model.Product;
+<i>8</i>&nbsp;import com.somecompany.warehouse.model.ProductsDTO;
+<i>9</i>&nbsp;import com.somecompany.warehouse.repository.ProductRepository;
+<i>10</i>&nbsp;import java.io.IOException;
+<i>11</i>&nbsp;import java.util.List;
+<i>12</i>&nbsp;import java.util.Optional;
+<i>13</i>&nbsp;import java.util.SortedSet;
+<i>14</i>&nbsp;import java.util.TreeSet;
+<i>15</i>&nbsp;import lombok.RequiredArgsConstructor;
+<i>16</i>&nbsp;import lombok.extern.slf4j.Slf4j;
+<i>17</i>&nbsp;import org.springframework.stereotype.Service;
+<i>18</i>&nbsp;import org.springframework.web.multipart.MultipartFile;
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;/**
+<i>21</i>&nbsp; * Default Product Service
+<i>22</i>&nbsp; */
+<i>23</i>&nbsp;@Service
+<b class="fc"><i>24</i>&nbsp;@RequiredArgsConstructor</b>
+<b class="fc"><i>25</i>&nbsp;@Slf4j</b>
+<i>26</i>&nbsp;public class ProductServiceImpl implements ProductService {
+<i>27</i>&nbsp;
+<i>28</i>&nbsp;  private final ProductRepository productRepository;
+<i>29</i>&nbsp;  private final ArticleService articleService;
+<i>30</i>&nbsp;
+<i>31</i>&nbsp;  private final ObjectMapper objectMapper;
+<i>32</i>&nbsp;
+<i>33</i>&nbsp;  /**
+<i>34</i>&nbsp;   * Load products into database
+<i>35</i>&nbsp;   *
+<i>36</i>&nbsp;   * @param productsFile productsFile
+<i>37</i>&nbsp;   * @throws IOException when fileupload/reading error
+<i>38</i>&nbsp;   * @throws FileUploadException when file Is null.
+<i>39</i>&nbsp;   */
+<i>40</i>&nbsp;  @Override
+<i>41</i>&nbsp;  public void loadProductsFromFile(MultipartFile productsFile)
+<i>42</i>&nbsp;      throws IOException, FileUploadException {
+<b class="fc"><i>43</i>&nbsp;    if (null == productsFile) {</b>
+<b class="nc"><i>44</i>&nbsp;      log.error(&quot;No Products file provided...&quot;);</b>
+<b class="nc"><i>45</i>&nbsp;      throw new FileUploadException(&quot;Products File is Null&quot;);</b>
+<i>46</i>&nbsp;    }
+<b class="fc"><i>47</i>&nbsp;    log.info(&quot;Recieved loadProducts file &quot;);</b>
+<b class="fc"><i>48</i>&nbsp;    ProductsDTO productsDTO = objectMapper</b>
+<b class="fc"><i>49</i>&nbsp;        .readValue(productsFile.getInputStream(), ProductsDTO.class);</b>
+<b class="fc"><i>50</i>&nbsp;    log.debug(&quot;Inserting {} productsDTO to database... &quot;, productsDTO.getProducts().size());</b>
+<b class="fc"><i>51</i>&nbsp;    productsDTO.getProducts().forEach(productRepository::save);</b>
+<b class="fc"><i>52</i>&nbsp;  }</b>
+<i>53</i>&nbsp;
+<i>54</i>&nbsp;  /**
+<i>55</i>&nbsp;   * List of Product with on spot quantity calculated.
+<i>56</i>&nbsp;   *
+<i>57</i>&nbsp;   * @return List of Product with on spot quantity calculated.
+<i>58</i>&nbsp;   */
+<i>59</i>&nbsp;  @Override
+<i>60</i>&nbsp;  public List&lt;Product&gt; getProductsAndQuantity() {
+<b class="nc"><i>61</i>&nbsp;    log.info(&quot;Recieved request to get Products and calculate quantity...&quot;);</b>
+<b class="nc"><i>62</i>&nbsp;    List&lt;Product&gt; products = productRepository.findAll();</b>
+<b class="nc"><i>63</i>&nbsp;    products.forEach(product -&gt; product.setQuantity(calculateProductQuantity(product)));</b>
+<b class="nc"><i>64</i>&nbsp;    return products;</b>
+<i>65</i>&nbsp;  }
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;
+<i>68</i>&nbsp;  private Long calculateProductQuantity(Product product) {
+<b class="nc"><i>69</i>&nbsp;    log.debug(&quot;Calculating quantity for {}&quot;, product.getName());</b>
+<b class="nc"><i>70</i>&nbsp;    SortedSet&lt;Long&gt; treeSet = new TreeSet&lt;&gt;();</b>
+<b class="nc"><i>71</i>&nbsp;    product.getContainArticles().forEach(productArticle -&gt; {</b>
+<b class="nc"><i>72</i>&nbsp;      Long articleStockById = articleService.getArticleStockById(productArticle.getArticleId());</b>
+<b class="nc"><i>73</i>&nbsp;      Long quantityPossibleForThisArticle = articleStockById / productArticle.getAmountOf();</b>
+<b class="nc"><i>74</i>&nbsp;      treeSet.add(quantityPossibleForThisArticle);</b>
+<b class="nc"><i>75</i>&nbsp;    });</b>
+<b class="nc"><i>76</i>&nbsp;    return treeSet.contains(0L) ? 0L : treeSet.first();</b>
+<i>77</i>&nbsp;  }
+<i>78</i>&nbsp;
+<i>79</i>&nbsp;  /**
+<i>80</i>&nbsp;   * Sell product and update inventory.
+<i>81</i>&nbsp;   *
+<i>82</i>&nbsp;   * @param productName productName
+<i>83</i>&nbsp;   * @param quantity quantity
+<i>84</i>&nbsp;   * @throws ProductNotFoundException when not found
+<i>85</i>&nbsp;   * @throws ProductOutOfStockException when out of stock
+<i>86</i>&nbsp;   */
+<i>87</i>&nbsp;  public void sellProduct(String productName, Long quantity)
+<i>88</i>&nbsp;      throws ProductNotFoundException, ProductOutOfStockException {
+<b class="nc"><i>89</i>&nbsp;    log.info(&quot;Received sell product request {} with quantity {}&quot;, productName, quantity);</b>
+<b class="nc"><i>90</i>&nbsp;    Optional&lt;Product&gt; productByName = productRepository.findByName(productName);</b>
+<b class="nc"><i>91</i>&nbsp;    if (!productByName.isPresent()) {</b>
+<b class="nc"><i>92</i>&nbsp;      log.error(&quot;No product found for name= &quot; + productName);</b>
+<b class="nc"><i>93</i>&nbsp;      throw new ProductNotFoundException(&quot;No product found for name=&quot; + productName);</b>
+<i>94</i>&nbsp;    }
+<b class="nc"><i>95</i>&nbsp;    Long productQuantity = calculateProductQuantity(</b>
+<b class="nc"><i>96</i>&nbsp;        productByName.get());</b>
+<b class="nc"><i>97</i>&nbsp;    if (quantity &lt;= productQuantity) {</b>
+<b class="nc"><i>98</i>&nbsp;      sellAndUpdateInventory(productByName.get(), quantity);</b>
+<i>99</i>&nbsp;    } else {
+<b class="nc"><i>100</i>&nbsp;      log.debug(&quot;Not enough Stock for Product= &quot; + productName);</b>
+<b class="nc"><i>101</i>&nbsp;      throw new ProductOutOfStockException(</b>
+<i>102</i>&nbsp;          &quot;OutOfStock Not enough articles to sell product:&quot; + productName);
+<i>103</i>&nbsp;    }
+<b class="nc"><i>104</i>&nbsp;  }</b>
+<i>105</i>&nbsp;
+<i>106</i>&nbsp;  private void sellAndUpdateInventory(Product product, Long quantity) {
+<b class="nc"><i>107</i>&nbsp;    product.getContainArticles().forEach(productArticle -&gt; {</b>
+<b class="nc"><i>108</i>&nbsp;      Long neededQuantityOfArticle = quantity * productArticle.getAmountOf();</b>
+<b class="nc"><i>109</i>&nbsp;      articleService</b>
+<b class="nc"><i>110</i>&nbsp;          .subtractStockFromArticleStock(productArticle.getArticleId(), neededQuantityOfArticle);</b>
+<b class="nc"><i>111</i>&nbsp;    });</b>
+<b class="nc"><i>112</i>&nbsp;  }</b>
+<i>113</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-08-24 21:16</div>
+</div>
+</body>
+</html>
