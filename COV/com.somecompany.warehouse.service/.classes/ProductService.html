@@ -1,0 +1,89 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: ProductService</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.somecompany.warehouse.service</a> ]
+</div>
+
+<h1>Coverage Summary for Class: ProductService (com.somecompany.warehouse.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">ProductService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.somecompany.warehouse.service;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.somecompany.warehouse.exception.FileUploadException;
+<i>4</i>&nbsp;import com.somecompany.warehouse.exception.ProductNotFoundException;
+<i>5</i>&nbsp;import com.somecompany.warehouse.exception.ProductOutOfStockException;
+<i>6</i>&nbsp;import com.somecompany.warehouse.model.Product;
+<i>7</i>&nbsp;import java.io.IOException;
+<i>8</i>&nbsp;import java.util.List;
+<i>9</i>&nbsp;import org.springframework.web.multipart.MultipartFile;
+<i>10</i>&nbsp;
+<i>11</i>&nbsp;/**
+<i>12</i>&nbsp; * Product Service
+<i>13</i>&nbsp; */
+<i>14</i>&nbsp;public interface ProductService {
+<i>15</i>&nbsp;
+<i>16</i>&nbsp;  /**
+<i>17</i>&nbsp;   * Load products into database
+<i>18</i>&nbsp;   *
+<i>19</i>&nbsp;   * @param productsFile productsFile
+<i>20</i>&nbsp;   * @throws IOException when fileupload/reading error
+<i>21</i>&nbsp;   * @throws FileUploadException when file Is null.
+<i>22</i>&nbsp;   */
+<i>23</i>&nbsp;  void loadProductsFromFile(MultipartFile productsFile) throws IOException, FileUploadException;
+<i>24</i>&nbsp;
+<i>25</i>&nbsp;  /**
+<i>26</i>&nbsp;   * List of Product with on spot quantity calculated.
+<i>27</i>&nbsp;   *
+<i>28</i>&nbsp;   * @return List of Product with on spot quantity calculated.
+<i>29</i>&nbsp;   */
+<i>30</i>&nbsp;  List&lt;Product&gt; getProductsAndQuantity();
+<i>31</i>&nbsp;
+<i>32</i>&nbsp;  /**
+<i>33</i>&nbsp;   * Sell product and update inventory.
+<i>34</i>&nbsp;   *
+<i>35</i>&nbsp;   * @param productName productName
+<i>36</i>&nbsp;   * @param quantity quantity
+<i>37</i>&nbsp;   * @throws ProductNotFoundException when not found
+<i>38</i>&nbsp;   * @throws ProductOutOfStockException when out of stock
+<i>39</i>&nbsp;   */
+<i>40</i>&nbsp;  void sellProduct(String productName, Long quantity)
+<i>41</i>&nbsp;      throws ProductNotFoundException, ProductOutOfStockException;
+<i>42</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-08-24 21:16</div>
+</div>
+</body>
+</html>
